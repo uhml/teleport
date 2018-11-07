@@ -1256,7 +1256,7 @@ func (s *IntSuite) TestMapRoles(c *check.C) {
 		},
 	})
 	c.Assert(err, check.IsNil)
-	err = aux.Process.GetAuthServer().UpsertRole(role, backend.Forever)
+	err = aux.Process.GetAuthServer().UpsertRole(role)
 	c.Assert(err, check.IsNil)
 	trustedClusterToken := "trusted-clsuter-token"
 	err = main.Process.GetAuthServer().UpsertToken(trustedClusterToken, []teleport.Role{teleport.RoleTrustedCluster}, backend.Forever)
@@ -1468,7 +1468,7 @@ func (s *IntSuite) trustedClusters(c *check.C, multiplex bool) {
 		},
 	})
 	c.Assert(err, check.IsNil)
-	err = aux.Process.GetAuthServer().UpsertRole(role, backend.Forever)
+	err = aux.Process.GetAuthServer().UpsertRole(role)
 	c.Assert(err, check.IsNil)
 	trustedClusterToken := "trusted-clsuter-token"
 	err = main.Process.GetAuthServer().UpsertToken(trustedClusterToken, []teleport.Role{teleport.RoleTrustedCluster}, backend.Forever)
@@ -1696,7 +1696,7 @@ func (s *IntSuite) TestDiscovery(c *check.C) {
 	// attempt to allow the discovery request to be received and the connection
 	// added to the agent pool.
 	lb.AddBackend(mainProxyAddr)
-	output, err = runCommand(main, []string{"echo", "hello world"}, cfg, 20)
+	output, err = runCommand(main, []string{"echo", "hello world"}, cfg, 40)
 	c.Assert(err, check.IsNil)
 	c.Assert(output, check.Equals, "hello world\n")
 
@@ -2577,7 +2577,7 @@ func (s *IntSuite) rotateTrustedClusters(c *check.C) {
 		},
 	})
 	c.Assert(err, check.IsNil)
-	err = aux.Process.GetAuthServer().UpsertRole(role, backend.Forever)
+	err = aux.Process.GetAuthServer().UpsertRole(role)
 	c.Assert(err, check.IsNil)
 	trustedClusterToken := "trusted-clsuter-token"
 	err = svc.GetAuthServer().UpsertToken(trustedClusterToken, []teleport.Role{teleport.RoleTrustedCluster}, backend.Forever)

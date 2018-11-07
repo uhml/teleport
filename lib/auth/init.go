@@ -17,6 +17,7 @@ limitations under the License.
 package auth
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
@@ -99,6 +100,9 @@ type InitConfig struct {
 	// Access is service controlling access to resources
 	Access services.Access
 
+	// Events is an event service
+	Events services.Events
+
 	// ClusterConfiguration is a services that holds cluster wide configuration.
 	ClusterConfiguration services.ClusterConfiguration
 
@@ -141,11 +145,11 @@ func Init(cfg InitConfig, opts ...AuthServerOption) (*AuthServer, error) {
 	}
 
 	domainName := cfg.ClusterName.GetClusterName()
-	err := cfg.Backend.AcquireLock(domainName, 30*time.Second)
+	err := backend.AcquireLock(context.TODO(), cfg.Backend, domainName, 30*time.Second)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	defer cfg.Backend.ReleaseLock(domainName)
+	defer backend.ReleaseLock(context.TODO(), cfg.Backend, domainName)
 
 	// check that user CA and host CA are present and set the certs if needed
 	asrv, err := NewAuthServer(&cfg, opts...)
@@ -160,7 +164,7 @@ func Init(cfg InitConfig, opts ...AuthServerOption) (*AuthServer, error) {
 	// same pattern as the rest of the configuration (they are not configuration
 	// singletons). However, we need to keep them around while Telekube uses them.
 	for _, role := range cfg.Roles {
-		if err := asrv.UpsertRole(role, backend.Forever); err != nil {
+		if err := asrv.UpsertRole(role); err != nil {
 			return nil, trace.Wrap(err)
 		}
 		log.Infof("Created role: %v.", role)
@@ -257,7 +261,7 @@ func Init(cfg InitConfig, opts ...AuthServerOption) (*AuthServer, error) {
 
 	// always create a default admin role
 	defaultRole := services.NewAdminRole()
-	err = asrv.CreateRole(defaultRole, backend.Forever)
+	err = asrv.CreateRole(defaultRole)
 	if err != nil && !trace.IsAlreadyExists(err) {
 		return nil, trace.Wrap(err)
 	}
@@ -476,7 +480,7 @@ func migrateUsers(asrv *AuthServer) error {
 		// create role for user and upsert to backend
 		role := services.RoleForUser(user)
 		role.SetLogins(services.Allow, raw.AllowedLogins)
-		err = asrv.UpsertRole(role, backend.Forever)
+		err = asrv.UpsertRole(role)
 		if err != nil {
 			return trace.Wrap(err)
 		}
@@ -502,7 +506,7 @@ func migrateAdminRole(asrv *AuthServer) error {
 	}
 	log.Infof("Migrating default admin role, adding default kubernetes groups.")
 	role.SetKubeGroups(services.Allow, defaultRole.GetKubeGroups(services.Allow))
-	return asrv.UpsertRole(role, backend.Forever)
+	return asrv.UpsertRole(role)
 }
 
 // isFirstStart returns 'true' if the auth server is starting for the 1st time

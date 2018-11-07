@@ -17,6 +17,7 @@ limitations under the License.
 package srv
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -29,7 +30,7 @@ import (
 	"github.com/gravitational/teleport/lib/auth"
 	authority "github.com/gravitational/teleport/lib/auth/testauthority"
 	"github.com/gravitational/teleport/lib/backend"
-	"github.com/gravitational/teleport/lib/backend/boltbk"
+	"github.com/gravitational/teleport/lib/backend/lite"
 	"github.com/gravitational/teleport/lib/services"
 	"github.com/gravitational/teleport/lib/utils"
 
@@ -48,7 +49,7 @@ var _ = check.Suite(&ExecSuite{})
 var _ = fmt.Printf
 
 func (s *ExecSuite) SetUpSuite(c *check.C) {
-	bk, err := boltbk.New(backend.Params{"path": c.MkDir()})
+	bk, err := lite.New(context.TODO(), backend.Params{"path": c.MkDir()})
 	c.Assert(err, check.IsNil)
 
 	c.Assert(err, check.IsNil)

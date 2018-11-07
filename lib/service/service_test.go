@@ -112,7 +112,7 @@ func (s *ServiceTestSuite) TestMonitor(c *check.C) {
 
 	// Advance time past the recovery time and then send another OK event, this
 	// should put Teleport into a OK state.
-	fakeClock.Advance(defaults.ServerHeartbeatTTL*2 + 1)
+	fakeClock.Advance(defaults.ServerKeepAliveTTL*2 + 1)
 	process.BroadcastEvent(Event{Name: TeleportOKEvent, Payload: nil})
 	err = waitForStatus(endpoint, http.StatusOK)
 	c.Assert(err, check.IsNil)

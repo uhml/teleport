@@ -209,6 +209,16 @@ type ClusterConfigSpecV3 struct {
 	DisconnectExpiredCert Bool `json:"disconnect_expired_cert"`
 }
 
+// GetResourceID returns resource ID
+func (c *ClusterConfigV3) GetResourceID() int64 {
+	return c.Metadata.ID
+}
+
+// SetResourceID sets resource ID
+func (c *ClusterConfigV3) SetResourceID(id int64) {
+	c.Metadata.ID = id
+}
+
 // GetName returns the name of the cluster.
 func (c *ClusterConfigV3) GetName() string {
 	return c.Metadata.Name
@@ -281,12 +291,12 @@ func (c *ClusterConfigV3) SetAuditConfig(cfg AuditConfig) {
 
 // GetClientIdleTimeout returns client idle timeout setting
 func (c *ClusterConfigV3) GetClientIdleTimeout() time.Duration {
-	return c.Spec.ClientIdleTimeout.Duration
+	return c.Spec.ClientIdleTimeout.Duration()
 }
 
 // SetClientIdleTimeout sets client idle timeout setting
 func (c *ClusterConfigV3) SetClientIdleTimeout(d time.Duration) {
-	c.Spec.ClientIdleTimeout.Duration = d
+	c.Spec.ClientIdleTimeout = Duration(d)
 }
 
 // GetDisconnectExpiredCert returns disconnect expired certificate setting

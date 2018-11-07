@@ -29,7 +29,7 @@ import (
 	"github.com/gravitational/teleport/lib/auth/native"
 	"github.com/gravitational/teleport/lib/auth/testauthority"
 	"github.com/gravitational/teleport/lib/backend"
-	"github.com/gravitational/teleport/lib/backend/dir"
+	"github.com/gravitational/teleport/lib/backend/lite"
 	"github.com/gravitational/teleport/lib/client"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/events"
@@ -51,7 +51,8 @@ import (
 // work faster but consuming more CPU (useful for integration testing)
 func SetTestTimeouts(t time.Duration) {
 	defaults.ReverseTunnelAgentHeartbeatPeriod = t
-	defaults.ServerHeartbeatTTL = t
+	defaults.ServerAnnounceTTL = t
+	defaults.ServerKeepAliveTTL = t
 	defaults.SessionRefreshPeriod = t
 }
 
@@ -359,7 +360,7 @@ func SetupUser(process *service.TeleportProcess, username string, roles []servic
 		roleOptions.ForwardAgent = services.NewBool(true)
 		role.SetOptions(roleOptions)
 
-		err = auth.UpsertRole(role, backend.Forever)
+		err = auth.UpsertRole(role)
 		if err != nil {
 			return trace.Wrap(err)
 		}
@@ -367,7 +368,7 @@ func SetupUser(process *service.TeleportProcess, username string, roles []servic
 		roles = append(roles, role)
 	} else {
 		for _, role := range roles {
-			err := auth.UpsertRole(role, backend.Forever)
+			err := auth.UpsertRole(role)
 			if err != nil {
 				return trace.Wrap(err)
 			}
@@ -465,7 +466,7 @@ func (i *TeleInstance) GenerateConfig(trustedSecrets []*InstanceSecrets, tconf *
 
 	tconf.AuthServers = append(tconf.AuthServers, tconf.Auth.SSHAddr)
 	tconf.Auth.StorageConfig = backend.Config{
-		Type:   dir.GetName(),
+		Type:   lite.GetName(),
 		Params: backend.Params{"path": dataDir + string(os.PathListSeparator) + defaults.BackendDir},
 	}
 
@@ -515,7 +516,7 @@ func (i *TeleInstance) CreateEx(trustedSecrets []*InstanceSecrets, tconf *servic
 			roleOptions.ForwardAgent = services.NewBool(true)
 			role.SetOptions(roleOptions)
 
-			err = auth.UpsertRole(role, backend.Forever)
+			err = auth.UpsertRole(role)
 			if err != nil {
 				return trace.Wrap(err)
 			}
@@ -524,7 +525,7 @@ func (i *TeleInstance) CreateEx(trustedSecrets []*InstanceSecrets, tconf *servic
 		} else {
 			roles = user.Roles
 			for _, role := range user.Roles {
-				err := auth.UpsertRole(role, backend.Forever)
+				err := auth.UpsertRole(role)
 				if err != nil {
 					return trace.Wrap(err)
 				}
