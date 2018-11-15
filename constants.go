@@ -152,6 +152,9 @@ const (
 	// ComponentRBAC is role-based access control.
 	ComponentRBAC = "rbac"
 
+	// ComponentTSH is the "tsh" binary.
+	ComponentTSH = "tsh"
+
 	// DebugEnvVar tells tests to use verbose debug output
 	DebugEnvVar = "DEBUG"
 
