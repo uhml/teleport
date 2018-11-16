@@ -152,6 +152,9 @@ const (
 	// ComponentRBAC is role-based access control.
 	ComponentRBAC = "rbac"
 
+	// ComponentKubeClient is the Kubernetes client.
+	ComponentKubeClient = "client:kube"
+
 	// DebugEnvVar tells tests to use verbose debug output
 	DebugEnvVar = "DEBUG"
 
